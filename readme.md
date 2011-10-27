@@ -1,5 +1,8 @@
 # Package for implementing Ogone payment services.
 
+## In development
+Please keep in mind that this is my first draft for this package, Im working on Data and origin verification and transaction feedback. Feel free to contribute.
+
 ## Installing
 
 Currently only available as download or clone from Github. Like any other package it must be put in its own 'ogone' dir in the packages dir and added to your app/config/config.php as an always loaded package.
