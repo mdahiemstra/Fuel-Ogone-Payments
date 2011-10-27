@@ -16,7 +16,7 @@
  */
 
 return array(
-	'environment' => 'development',
+	'debug' => true,
 	'psp_id' => 'pspidhere',
 	'shasign' => ')i8YKLod$j4&AOu3pfy', // Single quotes
 	'language' => 'en_US', // en_US, nl_NL, fr_FR, ...
