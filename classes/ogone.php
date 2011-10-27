@@ -87,6 +87,9 @@ class Ogone
 		self::$post_test_url = \Config::get('ogone.post_test_url');
 	}
 
+	/*
+	* Set the default currency
+	*/
 	public static function currency($currency) {
 		
 		self::$currency = $currency;
@@ -94,6 +97,9 @@ class Ogone
 		return static::instance();
 	}
 
+	/*
+	* Set order ID, must be unique
+	*/
 	public static function order($order_id) {
 		
 		if (!is_numeric($order_id))
@@ -104,6 +110,9 @@ class Ogone
 		return static::instance();
 	}
 
+	/*
+	* Set amount in cents
+	*/
 	public static function amount($amount) {
 		
 		if (!is_numeric($amount))
@@ -114,6 +123,9 @@ class Ogone
 		return static::instance();
 	}
 
+	/*
+	* Set the default payment method
+	*/
 	public static function method($method) {
 
 		self::$method = $method;
@@ -121,6 +133,9 @@ class Ogone
 		return static::instance();
 	}
 
+	/*
+	* Set contact details to verify and for fraud protection
+	*/
 	public static function contact($contactData) {
 
 		if (is_array($contactData)) {
@@ -139,71 +154,87 @@ class Ogone
 		return static::instance();
 	}
 	
+	/*
+	* Build the ogone payment form
+	*/
+	public static function build($submitButton = array('name' => 'ogoneSubmit', 'value' => 'Process Payment', 'attributes' => array())) {
+		
+		$html  = \Form::open(array('action' => \Config::get('ogone.debug') ? self::$post_test_url : self::$post_prod_url, 'method' => 'post'));
 
-	public static function build() 
-	{
-		$post_url = \Config::get('ogone.environment') == 'development' ? self::$post_test_url : $self::$post_prod_url;
-		$field_type = \Config::get('ogone.environment') == 'development' ? 'text' : 'hidden';
+		// Input type, text for debugging
+		$input = \Config::get('ogone.debug') ? 'input' : 'hidden';
 
-		$html = '<form method="post" action="'.$post_url.'" id="ogone_payment_form" name="ogone_payment_form">'
-			  . '<!-- general parameters: see General Payment Parameters -->'
-			  . '<input type="'.$field_type.'" name="PSPID" value="'.self::$psp_id.'">'
-			  . '<input type="'.$field_type.'" name="ORDERID" value="'.self::$order_id.'">'
-			  . '<input type="'.$field_type.'" name="AMOUNT" value="'.self::$amount.'">'
-			  . '<input type="'.$field_type.'" name="CURRENCY" value="'.self::$currency.'">'
-			  . '<input type="'.$field_type.'" name="LANGUAGE" value="'.self::$language.'">'
-			  . '<!-- optional customer details, highly recommended for fraud prevention -->'
-			  . '<input type="'.$field_type.'" name="CN" value="'.self::$contact['name'].'">'
-			  . '<input type="'.$field_type.'" name="EMAIL" value="'.self::$contact['email'].'">'
-			  . '<input type="'.$field_type.'" name="OWNERZIP" value="'.self::$contact['zipcode'].'">'
-			  . '<input type="'.$field_type.'" name="OWNERADDRESS" value="'.self::$contact['address'].'">'
-			  . '<input type="'.$field_type.'" name="OWNERCTY" value="'.self::$contact['country'].'">'
-			  . '<input type="'.$field_type.'" name="OWNERTOWN" value="'.self::$contact['city'].'">'
-			  . '<input type="'.$field_type.'" name="OWNERTELNO" value="'.self::$contact['phone'].'">'
-			  . '<input type="'.$field_type.'" name="COM" value="">'
-			  . '<!-- check before the payment: see SHA-1-IN signature -->'
-			  . '<input type="'.$field_type.'" name="SHASIGN" value="'.self::$shasign.'">'
-			  . '<!-- layout information: see Look & Feel of the Payment Page -->'
-			  . '<input type="'.$field_type.'" name="TITLE" value="">'
-			  . '<input type="'.$field_type.'" name="BGCOLOR" value="">'
-			  . '<input type="'.$field_type.'" name="TXTCOLOR" value="">'
-			  . '<input type="'.$field_type.'" name="TBLBGCOLOR" value="">'
-			  . '<input type="'.$field_type.'" name="TBLTXTCOLOR" value="">'
-			  . '<input type="'.$field_type.'" name="BUTTONBGCOLOR" value="">'
-			  . '<input type="'.$field_type.'" name="BUTTONTXTCOLOR" value="">'
-			  . '<input type="'.$field_type.'" name="LOGO" value="">'
-			  . '<input type="'.$field_type.'" name="FONTTYPE" value="">'
-			  . '<!-- dynamic template page: see Look & Feel of the Payment Page -->'
-			  . '<input type="'.$field_type.'" name="TP" value="">'
-			  . '<!-- payment methods/page specifics: see Payment method and payment page specifics -->'
-			  . '<input type="'.$field_type.'" name="PM" value="">'
-			  . '<input type="'.$field_type.'" name="BRAND" value="">'
-			  . '<input type="'.$field_type.'" name="WIN3DS" value="">'
-			  . '<input type="'.$field_type.'" name="PMLIST" value="">'
-			  . '<input type="'.$field_type.'" name="PMLISTTYPE" value="">'
-			  . '<!-- link to your website: see Default reaction -->'
-			  . '<input type="'.$field_type.'" name="HOMEURL" value="">'
-			  . '<input type="'.$field_type.'" name="CATALOGURL" value="">'
-			  . '<!-- post payment parameters -> '
-			  . '<input type="'.$field_type.'" name="COMPLUS" value="">'
-			  . '<input type="'.$field_type.'" name="PARAMPLUS" value="">'
-			  . '<!-- post payment parameters: see Direct feedback requests (Post-payment) -->'
-			  . '<input type="'.$field_type.'" name="PARAMVAR" value="">'
-			  . '<!-- post payment redirection: see Redirection depending on the payment result -->'
-			  . '<input type="'.$field_type.'" name="ACCEPTURL" value="'.self::$accept_url.'">'
-			  . '<input type="'.$field_type.'" name="DECLINEURL" value="'.self::$decline_url.'">'
-			  . '<input type="'.$field_type.'" name="EXCEPTIONURL" value="'.self::$exception_url.'">'
-			  . '<input type="'.$field_type.'" name="CANCELURL" value="'.self::$cancel_url.'">'
-			  . '<!-- optional operation field: see Operation -->'
-			  . '<input type="'.$field_type.'" name="OPERATION" value="">'
-			  . '<!-- optional extra login detail field: see User field -->'
-			  . '<input type="'.$field_type.'" name="USERID" value="">'
-			  . '<!-- Alias details: see Alias Management documentation -->'
-			  . '<input type="'.$field_type.'" name="ALIAS" value="">'
-			  . '<input type="'.$field_type.'" name="ALIASUSAGE" value="">'
-			  . '<input type="'.$field_type.'" name="ALIASOPERATION" value="">'
-			  . '<input type="submit" value="Pay" id="ogoneSubmit" name="ogoneSubmit">'
-			  . '</form>';
+		// General payment parameters
+		$html .= \Form::$input('PSPID', self::$psp_id);
+		$html .= \Form::$input('ORDERID', self::$order_id);
+		$html .= \Form::$input('AMOUNT', self::$amount);
+		$html .= \Form::$input('CURRENCY', self::$currency);
+		$html .= \Form::$input('LANGUAGE', self::$language);
+
+		// Optional customer details, highly recommended for fraud prevention
+		$html .= \Form::$input('CN', self::$contact['name']);
+		$html .= \Form::$input('EMAIL', self::$contact['email']);
+		$html .= \Form::$input('OWNERZIP', self::$contact['zipcode']);
+		$html .= \Form::$input('OWNERADDRESS', self::$contact['address']);
+		$html .= \Form::$input('OWNERCTY', self::$contact['country']);
+		$html .= \Form::$input('OWNERTOWN', self::$contact['city']);
+		$html .= \Form::$input('OWNERTELNO', self::$contact['name']);
+		$html .= \Form::$input('OWNERCTY', self::$contact['phone']);
+
+		// SHA-1-IN signature
+		$html .= \Form::$input('SHASIGN', self::$shasign);
+
+		// Look & Feel of the Payment Page
+		$html .= \Form::$input('TITLE', '');
+		$html .= \Form::$input('BGCOLOR', '');
+		$html .= \Form::$input('TXTCOLOR', '');
+		$html .= \Form::$input('TBLBGCOLOR', '');
+		$html .= \Form::$input('TBLTXTCOLOR', '');
+		$html .= \Form::$input('BUTTONBGCOLOR', '');
+		$html .= \Form::$input('BUTTONTXTCOLOR', '');
+		$html .= \Form::$input('LOGO', '');
+		$html .= \Form::$input('FONTTYPE', '');
+
+		// Dynamic template page (url)
+		$html .= \Form::$input('TP', '');
+		
+		// Payment method and payment page specifics
+		$html .= \Form::$input('PM', '');
+		$html .= \Form::$input('BRAND', '');
+		$html .= \Form::$input('WIN3DS', '');
+		$html .= \Form::$input('PMLIST', '');
+		$html .= \Form::$input('PMLISTTYPE', '');
+
+		// Link to webshop / cart
+		$html .= \Form::$input('HOMEURL', '');
+		$html .= \Form::$input('CATALOGURL', '');
+
+		// Post payment parameters
+		$html .= \Form::$input('COMPLUS', '');
+		$html .= \Form::$input('PARAMPLUS', '');
+		$html .= \Form::$input('PARAMVAR', '');
+
+		// Post payment redirection
+		$html .= \Form::$input('ACCEPTURL', self::$accept_url);
+		$html .= \Form::$input('DECLINEURL', self::$decline_url);
+		$html .= \Form::$input('EXCEPTIONURL', self::$exception_url);
+		$html .= \Form::$input('CANCELURL', self::$cancel_url);
+
+		// Optional operation field
+		$html .= \Form::$input('OPERATION', '');
+
+		// Optional extra login detail
+		$html .= \Form::$input('USERID', '');
+
+		// Alias Management Details
+		$html .= \Form::$input('ALIAS', '');
+		$html .= \Form::$input('ALIASUSAGE', '');
+		$html .= \Form::$input('ALIASOPERATION', '');
+
+		if ($submitButton)
+			$html .= \Form::button($submitButton['name'], $submitButton['value'], $submitButton['attributes']);
+
+		$html .= \Form::close();
 
 		return $html;
 	}
