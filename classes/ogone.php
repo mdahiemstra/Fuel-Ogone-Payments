@@ -157,9 +157,10 @@ class Ogone
 	/*
 	* Build the ogone payment form
 	*/
-	public static function build($submitButton = array('name' => 'ogoneSubmit', 'value' => 'Process Payment', 'attributes' => array())) {
+	public static function build($openForm = true, $submitButton = array('name' => 'ogoneSubmit', 'value' => 'Process Payment', 'attributes' => array())) {
 		
-		$html  = \Form::open(array('action' => \Config::get('ogone.debug') ? self::$post_test_url : self::$post_prod_url, 'method' => 'post'));
+		if ($openForm)
+			$html  = \Form::open(array('action' => \Config::get('ogone.debug') ? self::$post_test_url : self::$post_prod_url, 'method' => 'post'));
 
 		// Input type, text for debugging
 		$input = \Config::get('ogone.debug') ? 'input' : 'hidden';
@@ -233,8 +234,9 @@ class Ogone
 
 		if ($submitButton)
 			$html .= \Form::button($submitButton['name'], $submitButton['value'], $submitButton['attributes']);
-
-		$html .= \Form::close();
+		
+		if ($openForm)
+			$html .= \Form::close();
 
 		return $html;
 	}
