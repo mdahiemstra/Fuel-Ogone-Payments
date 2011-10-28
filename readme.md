@@ -1,7 +1,7 @@
 # Package for implementing Ogone payment services.
 
 ## In development
-Please keep in mind that this is my first draft for this package, Im working on 'Data and origin verification', 'transaction feedback' and 'SHA Signing'. Feel free to contribute.
+Please keep in mind that this is my first draft for this package, Im working on _Data and origin verification_, _transaction feedback_ and _SHA Signing_. Feel free to contribute.
 
 ## Installing
 
