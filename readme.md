@@ -13,11 +13,11 @@ Make sure you set your credentials and shasign in the configuration file.
 
 ```php
 Ogone::order(1)
-		->currency('USD')
-		->amount(100)
-		->method('CreditCard')
-		->contact(array('name' => 'John Doe', 'email' => 'john@doe.com'))
-		->build();
+ ->currency('USD')
+ ->amount(100)
+ ->method('CreditCard')
+ ->contact(array('name' => 'John Doe', 'email' => 'john@doe.com'))
+ ->build();
 ```
 
 Will return plain HTML containing the Ogone payment form.
