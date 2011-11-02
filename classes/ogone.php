@@ -48,7 +48,8 @@ class Ogone
 	protected static $method = null;
 	protected static $contact = array('name' => null, 'email' => null, 'country' => null, 'zipcode' => null, 'address' => null, 'city' => null, 'phone' => null);
 	protected static $subscription = array('id' => null, 'amount' => null, 'comment' => null, 'order_id' => null, 'period_unit' => null, 'period_number' => null, 'period_moment' => null, 'startdate' => null, 'enddate' => null, 'status' => null, 'merc_comment' => null);
-	
+	protected static $extra_params = array('TITLE' => null, 'BGCOLOR' => null, 'TXTCOLOR' => null, 'TBLBGCOLOR' => null, 'TBLTXTCOLOR' => null, 'BUTTONBGCOLOR' => null, 'BUTTONTXTCOLOR' => null, 'LOGO' => null, 'FONTTYPE' => null, 'TP' => null, 'PM' => null, 'BRAND' => null, 'WIN3DS' => null, 'PMLIST' => null, 'PMLISTTYPE' => null, 'HOMEURL' => null, 'CATALOGURL' => null, 'COMPLUS' => null, 'PARAMPLUS' => null, 'PARAMVAR' => null, 'OPERATION' => null, 'USERID' => null, 'ALIAS' => null, 'ALIASUSAGE' => null, 'ALIASOPERATION' => null);
+
 	protected static $_instance = null;
 
 	protected static $_fields = array();
@@ -178,6 +179,15 @@ class Ogone
 		return static::instance();
 	}
 
+	public static function extra($data) {
+		
+		$data = array_merge(self::$extra_params, $data);
+
+		self::$extra_params = $data;
+
+		return static::instance();
+	}
+
 	private static function buildSHA() {
 
 		// Alphabetical order to comply with Ogone's SHA building
@@ -227,44 +237,11 @@ class Ogone
 						'OWNERTELNO' => self::$contact['phone'],
 						/* SHA-1-IN signature */
 						'SHASIGN' => '',
-						/* Look & Feel of the Payment Page */
-						'TITLE' => '',
-						'BGCOLOR' => '',
-						'TXTCOLOR' => '',
-						'TBLBGCOLOR' => '',
-						'TBLTXTCOLOR' => '',
-						'BUTTONBGCOLOR' => '',
-						'BUTTONTXTCOLOR' => '',
-						'LOGO' => '',
-						'FONTTYPE' => '',
-						/* Dynamic template page (url) */
-						'TP' => '',
-						/* Payment method and payment page specifics */
-						'PM' => '',
-						'BRAND' => '',
-						'WIN3DS' => '',
-						'PMLIST' => '',
-						'PMLISTTYPE' => '',
-						/* Link to webshop / cart */
-						'HOMEURL' => '',
-						'CATALOGURL' => '',
-						/* Post payment parameters */
-						'COMPLUS' => '',
-						'PARAMPLUS' => '',
-						'PARAMVAR' => '',
 						/* Post payment redirection */
 						'ACCEPTURL' => self::$accept_url,
 						'DECLINEURL' => self::$decline_url,
 						'EXCEPTIONURL' => self::$exception_url,
 						'CANCELURL' => self::$cancel_url,
-						/* Optional operation field */
-						'OPERATION' => '',
-						/* Optional extra login detail */
-						'USERID' => '',
-						/* Alias Management Details */
-						'ALIAS' => '',
-						'ALIASUSAGE' => '',
-						'ALIASOPERATION' => '',
 						/* Subscription Manager */
 						'SUBSCRIPTION_ID' => self::$subscription['id'],
 						'SUB_AMOUNT' => self::$subscription['amount'],
@@ -278,6 +255,13 @@ class Ogone
 						'SUB_STATUS' => self::$subscription['status'],
 						'SUB_COMMENT' => self::$subscription['merc_comment']
 						);
+
+		// Add extra params
+		foreach (self::$extra_params as $name => $value) {
+			
+			if (!empty($value))
+				self::$_fields[$name] = $value;
+		}
 		
 		self::$_fields['SHASIGN'] = self::buildSHA();
 
@@ -301,8 +285,6 @@ class Ogone
 	public static function handlePostsale($raw = false) {
 		
 		$post_data = file_get_contents('php://input');
-
-		$post_data = "orderID=3&currency=EUR&amount=1&PM=CreditCard&ACCEPTANCE=test123&STATUS=9&CARDNO=XXXXXXXXXXXX9999&ED=0213&CN=asdf&TRXDATE=11%2F02%2F11&PAYID=12218460&NCERROR=0&BRAND=MasterCard&IP=84%2E83%2E114%2E83&SHASIGN=BA9852052AF8930CA7110E0BBE179EF3F10C2C228B0BEEDC71EE29E4596B486C5DCA95642BA7CCFF03F85F7FB65ECC934942019737E577440BB0D5087C23AC29";
 
 		if (empty($post_data))
 			throw new \Fuel_Exception("No postsale data found");
