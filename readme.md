@@ -78,6 +78,12 @@ try
 }
 ```
 
+## Links
+
+* [Fuel Framework](http://fuelphp.com/)
+* [Ogone Payment Services](http://ogone.com/)
+* [Michel Hiemstra](http://michelhiemstra.nl/)
+
 
 ## LICENSE: 
 
