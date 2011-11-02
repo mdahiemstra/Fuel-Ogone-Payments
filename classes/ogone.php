@@ -47,6 +47,7 @@ class Ogone
 	protected static $amount = null;
 	protected static $method = null;
 	protected static $contact = array('name' => null, 'email' => null, 'country' => null, 'zipcode' => null, 'address' => null, 'city' => null, 'phone' => null);
+	protected static $subscription = array('id' => null, 'amount' => null, 'comment' => null, 'order_id' => null, 'period_unit' => null, 'period_number' => null, 'period_moment' => null, 'startdate' => null, 'enddate' => null, 'status' => null, 'merc_comment' => null);
 	
 	protected static $_instance = null;
 
@@ -168,6 +169,15 @@ class Ogone
 		return static::instance();
 	}
 
+	public static function subscription($data) {
+		
+		$data = array_merge(self::$subscription, $data);
+
+		self::$subscription = $data;
+
+		return static::instance();
+	}
+
 	private static function buildSHA() {
 
 		// Alphabetical order to comply with Ogone's SHA building
@@ -255,6 +265,18 @@ class Ogone
 						'ALIAS' => '',
 						'ALIASUSAGE' => '',
 						'ALIASOPERATION' => '',
+						/* Subscription Manager */
+						'SUBSCRIPTION_ID' => self::$subscription['id'],
+						'SUB_AMOUNT' => self::$subscription['amount'],
+						'SUB_COM' => self::$subscription['comment'],
+						'SUB_ORDERID' => self::$subscription['order_id'],
+						'SUB_PERIOD_UNIT' => self::$subscription['period_unit'],
+						'SUB_PERIOD_NUMBER' => self::$subscription['period_number'],
+						'SUB_PERIOD_MOMENT' => self::$subscription['period_moment'],
+						'SUB_STARTDATE' => self::$subscription['startdate'],
+						'SUB_ENDDATE' => self::$subscription['enddate'],
+						'SUB_STATUS' => self::$subscription['status'],
+						'SUB_COMMENT' => self::$subscription['merc_comment']
 						);
 		
 		self::$_fields['SHASIGN'] = self::buildSHA();
@@ -262,7 +284,8 @@ class Ogone
 		// Iterate for each field
 		foreach (self::$_fields as $name => $value) {
 			
-			$html .= \Form::$input($name, $value);
+			if (!empty($value))
+				$html .= \Form::$input($name, $value);
 		}
 
 		// Do we need to parse a submit button
@@ -278,6 +301,8 @@ class Ogone
 	public static function handlePostsale($raw = false) {
 		
 		$post_data = file_get_contents('php://input');
+
+		$post_data = "orderID=3&currency=EUR&amount=1&PM=CreditCard&ACCEPTANCE=test123&STATUS=9&CARDNO=XXXXXXXXXXXX9999&ED=0213&CN=asdf&TRXDATE=11%2F02%2F11&PAYID=12218460&NCERROR=0&BRAND=MasterCard&IP=84%2E83%2E114%2E83&SHASIGN=BA9852052AF8930CA7110E0BBE179EF3F10C2C228B0BEEDC71EE29E4596B486C5DCA95642BA7CCFF03F85F7FB65ECC934942019737E577440BB0D5087C23AC29";
 
 		if (empty($post_data))
 			throw new \Fuel_Exception("No postsale data found");
