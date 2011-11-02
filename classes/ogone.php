@@ -32,6 +32,7 @@ class Ogone
 	// Forward declare credentials, endpoints, URLs, defaults etc
 	protected static $psp_id = null;
 	protected static $shasign = null;
+	protected static $hash_method = null;
 	protected static $language = null; 
 	protected static $currency = null; 
 	protected static $accept_url = null;
@@ -48,6 +49,8 @@ class Ogone
 	protected static $contact = array('name' => null, 'email' => null, 'country' => null, 'zipcode' => null, 'address' => null, 'city' => null, 'phone' => null);
 	
 	protected static $_instance = null;
+
+	protected static $_fields = array();
 
 	public static function instance()
 	{
@@ -77,6 +80,7 @@ class Ogone
 
 		self::$psp_id = \Config::get('ogone.psp_id');
 		self::$shasign = \Config::get('ogone.shasign');
+		self::$hash_method = \Config::get('ogone.hash_method');
 		self::$language = \Config::get('ogone.language');
 		self::$currency = \Config::get('ogone.currency');
 		self::$accept_url = \Config::get('ogone.accept_url');
@@ -153,6 +157,26 @@ class Ogone
 
 		return static::instance();
 	}
+
+	private static function buildSHA() {
+
+		// Alphabetical order to comply with Ogone's SHA building
+		ksort(self::$_fields);
+		
+		// Forward declare the var we are using for the sha string
+		$sha_string = null;
+
+		foreach (self::$_fields as $name => $value) {
+
+			if (!empty($value))
+				$sha_string .= strtoupper($name) . '=' . $value . self::$shasign;
+		}
+
+		// Uppercase, hexadecimal
+		$shaout = strtoupper(bin2hex(mhash(self::$hash_method, $sha_string)));
+
+		return $shaout;
+	}
 	
 	/*
 	* Build the ogone payment form
@@ -165,73 +189,73 @@ class Ogone
 		// Input type, text for debugging
 		$input = \Config::get('ogone.debug') ? 'input' : 'hidden';
 
-		// General payment parameters
-		$html .= \Form::$input('PSPID', self::$psp_id);
-		$html .= \Form::$input('ORDERID', self::$order_id);
-		$html .= \Form::$input('AMOUNT', self::$amount);
-		$html .= \Form::$input('CURRENCY', self::$currency);
-		$html .= \Form::$input('LANGUAGE', self::$language);
-
-		// Optional customer details, highly recommended for fraud prevention
-		$html .= \Form::$input('CN', self::$contact['name']);
-		$html .= \Form::$input('EMAIL', self::$contact['email']);
-		$html .= \Form::$input('OWNERZIP', self::$contact['zipcode']);
-		$html .= \Form::$input('OWNERADDRESS', self::$contact['address']);
-		$html .= \Form::$input('OWNERCTY', self::$contact['country']);
-		$html .= \Form::$input('OWNERTOWN', self::$contact['city']);
-		$html .= \Form::$input('OWNERTELNO', self::$contact['name']);
-		$html .= \Form::$input('OWNERCTY', self::$contact['phone']);
-
-		// SHA-1-IN signature
-		$html .= \Form::$input('SHASIGN', self::$shasign);
-
-		// Look & Feel of the Payment Page
-		$html .= \Form::$input('TITLE', '');
-		$html .= \Form::$input('BGCOLOR', '');
-		$html .= \Form::$input('TXTCOLOR', '');
-		$html .= \Form::$input('TBLBGCOLOR', '');
-		$html .= \Form::$input('TBLTXTCOLOR', '');
-		$html .= \Form::$input('BUTTONBGCOLOR', '');
-		$html .= \Form::$input('BUTTONTXTCOLOR', '');
-		$html .= \Form::$input('LOGO', '');
-		$html .= \Form::$input('FONTTYPE', '');
-
-		// Dynamic template page (url)
-		$html .= \Form::$input('TP', '');
+		// Assign values to the fields
+		self::$_fields = array(
+						/* General payment parameters */
+						'PSPID' => self::$psp_id,
+						'ORDERID' => self::$order_id,
+						'AMOUNT' => self::$amount,
+						'CURRENCY' => self::$currency,
+						'LANGUAGE' => self::$language,
+						/* Optional customer details, highly recommended for fraud prevention */
+						'CN' => self::$contact['name'],
+						'EMAIL' => self::$contact['email'],
+						'OWNERZIP' => self::$contact['zipcode'],
+						'OWNERADDRESS' => self::$contact['address'],
+						'OWNERCTY' => self::$contact['country'],
+						'OWNERTOWN' => self::$contact['city'],
+						'OWNERTELNO' => self::$contact['phone'],
+						/* SHA-1-IN signature */
+						'SHASIGN' => '',
+						/* Look & Feel of the Payment Page */
+						'TITLE' => '',
+						'BGCOLOR' => '',
+						'TXTCOLOR' => '',
+						'TBLBGCOLOR' => '',
+						'TBLTXTCOLOR' => '',
+						'BUTTONBGCOLOR' => '',
+						'BUTTONTXTCOLOR' => '',
+						'LOGO' => '',
+						'FONTTYPE' => '',
+						/* Dynamic template page (url) */
+						'TP' => '',
+						/* Payment method and payment page specifics */
+						'PM' => '',
+						'BRAND' => '',
+						'WIN3DS' => '',
+						'PMLIST' => '',
+						'PMLISTTYPE' => '',
+						/* Link to webshop / cart */
+						'HOMEURL' => '',
+						'CATALOGURL' => '',
+						/* Post payment parameters */
+						'COMPLUS' => '',
+						'PARAMPLUS' => '',
+						'PARAMVAR' => '',
+						/* Post payment redirection */
+						'ACCEPTURL' => self::$accept_url,
+						'DECLINEURL' => self::$decline_url,
+						'EXCEPTIONURL' => self::$exception_url,
+						'CANCELURL' => self::$cancel_url,
+						/* Optional operation field */
+						'OPERATION' => '',
+						/* Optional extra login detail */
+						'USERID' => '',
+						/* Alias Management Details */
+						'ALIAS' => '',
+						'ALIASUSAGE' => '',
+						'ALIASOPERATION' => '',
+						);
 		
-		// Payment method and payment page specifics
-		$html .= \Form::$input('PM', '');
-		$html .= \Form::$input('BRAND', '');
-		$html .= \Form::$input('WIN3DS', '');
-		$html .= \Form::$input('PMLIST', '');
-		$html .= \Form::$input('PMLISTTYPE', '');
+		self::$_fields['SHASIGN'] = self::buildSHA();
 
-		// Link to webshop / cart
-		$html .= \Form::$input('HOMEURL', '');
-		$html .= \Form::$input('CATALOGURL', '');
+		// Iterate for each field
+		foreach (self::$_fields as $name => $value) {
+			
+			$html .= \Form::$input($name, $value);
+		}
 
-		// Post payment parameters
-		$html .= \Form::$input('COMPLUS', '');
-		$html .= \Form::$input('PARAMPLUS', '');
-		$html .= \Form::$input('PARAMVAR', '');
-
-		// Post payment redirection
-		$html .= \Form::$input('ACCEPTURL', self::$accept_url);
-		$html .= \Form::$input('DECLINEURL', self::$decline_url);
-		$html .= \Form::$input('EXCEPTIONURL', self::$exception_url);
-		$html .= \Form::$input('CANCELURL', self::$cancel_url);
-
-		// Optional operation field
-		$html .= \Form::$input('OPERATION', '');
-
-		// Optional extra login detail
-		$html .= \Form::$input('USERID', '');
-
-		// Alias Management Details
-		$html .= \Form::$input('ALIAS', '');
-		$html .= \Form::$input('ALIASUSAGE', '');
-		$html .= \Form::$input('ALIASOPERATION', '');
-
+		// Do we need to parse a submit button
 		if ($submitButton)
 			$html .= \Form::button($submitButton['name'], $submitButton['value'], $submitButton['attributes']);
 		
