@@ -52,6 +52,16 @@ class Ogone
 
 	protected static $_fields = array();
 
+	protected static $status_messages = array(5 => 'The authorization has been accepted.',
+											  9 => 'The payment has been accepted.',
+											  0 => 'Invalid or incomplete.',
+											  2 => 'Authorization refused.',
+											  52 => 'The authorization will be processed offline.',
+											  91 => 'The data capture will be processed offline.',
+											  52 => 'Authorization not known.',
+											  92 => 'Payment uncertain.',
+											  93 => 'Payment refused.');
+
 	public static function instance()
 	{
 		if (static::$_instance == null)
@@ -263,6 +273,25 @@ class Ogone
 			$html .= \Form::close();
 
 		return $html;
+	}
+
+	public static function handlePostsale($raw = false) {
+		
+		$post_data = file_get_contents('php://input');
+
+		if (empty($post_data))
+			throw new \Fuel_Exception("No postsale data found");
+
+		// Parse string into array
+		parse_str($post_data, $data);
+
+		if ($raw)
+			return $data;
+
+		return array('order_id' => $data['orderID'],
+					 'status' => $data['STATUS'],
+					 'status_txt' => self::$status_messages[$data['STATUS']],
+					 'date' => strtotime($data['TRXDATE']));
 	}
 	
 }
