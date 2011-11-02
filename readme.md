@@ -4,10 +4,10 @@
 Please keep in mind that this is my first draft for this package. Feel free to contribute.
 
 The current package contains the following features:
-* Initiate payments
-* Signature data verification
-* Subscription Manager (Recurring payments)
-* Postsale callback (payment accepted, declined, rejected etc)
+*	Initiate payments
+*	Signature data verification
+*	Subscription Manager (Recurring payments)
+*	Postsale callback (payment accepted, declined, rejected etc)
 
 ## Installing
 
