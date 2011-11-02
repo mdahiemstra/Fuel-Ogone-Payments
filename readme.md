@@ -1,7 +1,13 @@
 # Package for implementing Ogone payment services.
 
 ## In development
-Please keep in mind that this is my first draft for this package, Im working on _Data and origin verification_, _transaction feedback_ and _SHA Signing_. Feel free to contribute.
+Please keep in mind that this is my first draft for this package. Feel free to contribute.
+
+The current package contains the following features:
+* Initiate payments
+* Signature data verification
+* Subscription Manager (Recurring payments)
+* Postsale callback (payment accepted, declined, rejected etc)
 
 ## Installing
 
@@ -9,11 +15,11 @@ Currently only available as download or clone from Github. Like any other packag
 
 ## Usage
 
-Make sure you set your credentials and shasign in the configuration file.
+Make sure you set your credentials and your SHA-IN signature in the configuration file.
 
 ```php
 Ogone::order(1)
- ->currency('USD')
+ ->currency('EUR')
  ->amount(100)
  ->method('CreditCard')
  ->contact(array('name' => 'John Doe', 'email' => 'john@doe.com'))
@@ -21,6 +27,51 @@ Ogone::order(1)
 ```
 
 Will return plain HTML containing the Ogone payment form.
+
+To create a recurring payment profile (subscription) you can add the following method (example):
+
+```php
+subscription(array('id' => 1, 'amount' => 100, 'comment' => 'Subscription for Magazine',
+	'period_unit' => 'm', 'period_number' => 1, 'period_moment' => 1,
+	'startdate' => date('Y-m-d', strtotime("+1 month")), 'enddate' => date('Y-m-d', strtotime("+12 months")),
+	'status' => 1, 'merc_comment' => 'Testing'))
+
+// So e.g: Ogone::order(1)->subscription(..)->amount(100)->build();
+```
+
+You can also add some extra optional parameters, like theme and styling of the payment page:
+
+```php
+extra(array('TITLE' => 'Foobar Payment Portal')) // Look for all parameters in the ogone.php class $extra_params
+
+// So e.g: Ogone::order(1)->extra(..)->amount(100)->build();
+```
+
+Handle postsale callback like this for example:
+
+```php
+try 
+{
+	$postsale = Ogone::handlePostsale();
+
+	/**
+	 * Will return array like so:
+	 *
+	 * 'order_id' => 1,
+	 * 'status' => 9,
+	 * 'status_txt' => 'The payment has been accepted.',
+	 * 'date' => current
+	 *
+	 * To output raw data pass true as function parameter
+	 */
+
+	Log::debug($postsale);
+
+} catch (Exception $e) {
+	
+	die($e);
+}
+```
 
 
 ## LICENSE: 

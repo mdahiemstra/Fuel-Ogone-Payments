@@ -17,9 +17,9 @@
 
 /**
  * Basic usage:
- * 		Ogone::order(1)->currency('USD')->amount(100)->method('CreditCard')->build();
+ * 		Ogone::order(1)->currency('EUR')->amount(100)->method('CreditCard')->build();
  *
- * returns plain HTML containing the postform for Ogone payments.
+ * returns HTML containing the postform for Ogone payments.
  *
 */
 
@@ -171,7 +171,9 @@ class Ogone
 	}
 
 	public static function subscription($data) {
-		
+
+		$data['order_id'] = self::$order_id;
+
 		$data = array_merge(self::$subscription, $data);
 
 		self::$subscription = $data;
