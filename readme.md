@@ -29,6 +29,8 @@ Ogone::order(1)
 
 Will return plain HTML containing the Ogone payment form.
 
+### Recurring payments
+
 To create a recurring payment profile (subscription) you can add the following method (example):
 
 ```php
@@ -39,6 +41,8 @@ subscription(array('id' => 1, 'amount' => 100, 'comment' => 'Subscription for Ma
 
 // So e.g: Ogone::order(1)->subscription(..)->amount(100)->build();
 ```
+
+### Extra parameters like theming
 
 You can also add some extra optional parameters, like theme and styling of the payment page:
 
