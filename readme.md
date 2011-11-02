@@ -84,6 +84,8 @@ try
 * [Ogone Payment Services](http://ogone.com/)
 * [Michel Hiemstra](http://michelhiemstra.nl/)
 
+For documentation on Ogone check the [Downloads](https://github.com/mdahiemstra/Fuel-Ogone-Payments/downloads) section
+
 
 ## LICENSE: 
 
