@@ -1,7 +1,7 @@
 # Package for implementing Ogone payment services.
 
 ## In development
-Please keep in mind that this is my first draft for this package, Im working on Data and origin verification and transaction feedback. Feel free to contribute.
+Please keep in mind that this is my first draft for this package, Im working on _Data and origin verification_, _transaction feedback_ and _SHA Signing_. Feel free to contribute.
 
 ## Installing
 
@@ -12,11 +12,12 @@ Currently only available as download or clone from Github. Like any other packag
 Make sure you set your credentials and shasign in the configuration file.
 
 ```php
-Ogone::order(1)->currency('USD')
-			->amount(100)
-			->method('CreditCard')
-			->contact(array('name' => 'John Doe', 'email' => 'john@doe.com'))
-			->build();
+Ogone::order(1)
+ ->currency('USD')
+ ->amount(100)
+ ->method('CreditCard')
+ ->contact(array('name' => 'John Doe', 'email' => 'john@doe.com'))
+ ->build();
 ```
 
 Will return plain HTML containing the Ogone payment form.
