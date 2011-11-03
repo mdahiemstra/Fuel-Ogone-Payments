@@ -100,7 +100,7 @@ class Ogone
 		self::$exception_url = \Config::get('ogone.exception_url');
 		self::$cancel_url = \Config::get('ogone.cancel_url');
 		self::$post_test_url = \Config::get('ogone.post_test_url');
-		self::$post_test_url = \Config::get('ogone.post_test_url');
+		self::$post_prod_url = \Config::get('ogone.post_prod_url');
 	}
 
 	/*
@@ -174,18 +174,24 @@ class Ogone
 
 		$data['order_id'] = self::$order_id;
 
-		$data = array_merge(self::$subscription, $data);
-
-		self::$subscription = $data;
+		foreach ($data as $key => $value) 
+			
+			if (array_key_exists($key, self::$subscription)) 
+				self::$subscription[$key] = $value;
+			else 
+				throw new \Fuel_Exception("subscription $key not found");
 
 		return static::instance();
 	}
 
 	public static function extra($data) {
-		
-		$data = array_merge(self::$extra_params, $data);
 
-		self::$extra_params = $data;
+		foreach ($data as $key => $value) 
+			
+			if (array_key_exists($key, self::$extra_params)) 
+				self::$extra_params[$key] = $value;
+			else 
+				throw new \Fuel_Exception("extra_params $key not found");
 
 		return static::instance();
 	}
