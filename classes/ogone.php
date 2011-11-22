@@ -210,8 +210,12 @@ class Ogone
 				$sha_string .= strtoupper($name) . '=' . $value . self::$shasign;
 		}
 
-		// Uppercase, hexadecimal
-		$shaout = strtoupper(bin2hex(mhash(self::$hash_method, $sha_string)));
+		if (function_exists('hash'))
+			$shaout = hash(self::$hash_method, $sha_string);
+		elseif (function_exists('mhash'))
+			$shaout = strtoupper(bin2hex(mhash(self::$hash_method, $sha_string)));
+		else
+			throw new \Fuel_Exception("No encryption method found");
 
 		return $shaout;
 	}
